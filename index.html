@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Оформление заказа — Торговый представитель</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Отключение выделения при быстром клике на кнопках в мобильных устройствах */
+    button {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 antialiased min-h-screen flex flex-col pb-28">
+
+  <!-- Шапка -->
+  <header class="bg-blue-600 text-white shadow-md sticky top-0 z-30 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-2">
+      <i class="fa-solid font-bold fa-cart-shopping text-2xl text-yellow-300"></i>
+      <div>
+        <h1 class="text-lg font-bold leading-tight">Прием заказов</h1>
+        <p class="text-xs text-blue-100">Форма для торговых представителей</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto w-full p-4 flex-1 space-y-4">
+
+    <!-- Данные торговой точки -->
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-3">
+      <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wide flex items-center gap-2 border-b pb-2">
+        <i class="fa-solid fa-store text-blue-600"></i> Данные клиента
+      </h2>
+      
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">ИП / Название точки <span class="text-red-500">*</span></label>
+        <input type="text" id="clientIp" placeholder="Например: ИП Иванов В.А." class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Адрес торговой точки <span class="text-red-500">*</span></label>
+        <input type="text" id="clientAddress" placeholder="Улица, дом, бутик..." class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Телефон для WhatsApp (куда отправлять) <span class="text-red-500">*</span></label>
+        <input type="tel" id="whatsappPhone" placeholder="77071234567" class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+        <span class="text-[10px] text-gray-400">Формат без плюса: 7707... или 7777...</span>
+      </div>
+    </section>
+
+    <!-- Поиск по каталогу -->
+    <div class="relative">
+      <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+      <input type="text" id="searchInput" placeholder="Поиск по названию..." class="w-full bg-white border border-gray-300 rounded-xl pl-9 pr-4 py-2.5 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+    </div>
+
+    <!-- Ассортимент -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold text-gray-700 uppercase tracking-wide">
+          <i class="fa-solid fa-boxes-stacked text-blue-600 mr-1"></i> Товары
+        </h2>
+        <span id="productCount" class="text-xs font-medium text-gray-500">Показано: 10</span>
+      </div>
+
+      <div id="productList" class="space-y-2.5">
+        <!-- Товары будут сгенерированы через JS -->
+      </div>
+    </section>
+
+    <!-- Комментарий к заказу -->
+    <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 space-y-2">
+      <label class="block text-xs font-semibold text-gray-600">Примечание / Комментарий к заказу</label>
+      <textarea id="orderComment" rows="2" placeholder="Например: Доставка до обеда, расчет наличными..." class="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all resize-none"></textarea>
+    </section>
+
+  </main>
+
+  <!-- Нижняя панель с итогом и кнопкой отправки -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 p-3">
+    <div class="max-w-md mx-auto flex items-center justify-between gap-3">
+      <div>
+        <div class="text-xs text-gray-500">Итого (<span id="totalItems">0</span> шт):</div>
+        <div class="text-xl font-black text-blue-700 leading-tight"><span id="totalSum">0</span> ₸</div>
+      </div>
+      
+      <button id="sendBtn" onclick="sendToWhatsApp()" class="flex-1 bg-green-600 hover:bg-green-700 active:scale-95 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+        <i class="fa-brands fa-whatsapp text-2xl"></i>
+        <span>Отправить заказ</span>
+      </button>
+    </div>
+  </footer>
+
+  <!-- Скрипт работы логики -->
+  <script>
+    // Список товаров из ведомости с ценами
+    const products = [
+      { id: 1, name: 'Конфеты мультизлаковые АССОРТИ Упаковка 0,4 кг', price: 1275 },
+      { id: 2, name: 'Конфеты мультизлаковые с белой глазурью и воздушным рисом (фасовка 0,4кг) (3)', price: 1275 },
+      { id: 3, name: 'Конфеты мультизлаковые с темной глазурью (фасовка 0,4кг) (С)', price: 1275 },
+      { id: 4, name: 'Конфеты мультизлаковые с темной глазурью и воздушным рисом (фасовка 0,4кг)', price: 1275 },
+      { id: 5, name: 'Печенье "Choco Loco" Шоу бокс 22 шт. по 0,66 кг', price: 2035 },
+      { id: 6, name: 'Печенье "Ziffy клубничный" Коробка 0,31 кг', price: 1035 },
+      { id: 7, name: 'Печенье "Ziffy с кокосом" Коробка 0,31 кг', price: 1035 },
+      { id: 8, name: 'Печенье "Ziffy шоколадный с кокосом" Коробка 0,38 кг', price: 1200 },
+      { id: 9, name: 'Печенье "Ziffy" Коробка 0,35 кг', price: 1140 },
+      { id: 10, name: 'Печенье "Крекер сырный" Коррекс 0,75 кг', price: 1245 }
+    ];
+
+    // Хранилище количества заказанного товара { id: count }
+    const cart = {};
+
+    // Загрузка сохраненного номера телефона клиента, если есть
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedPhone = localStorage.getItem('tp_whatsapp_phone');
+      if (savedPhone) {
+        document.getElementById('whatsappPhone').value = savedPhone;
+      }
+      renderProducts(products);
+    });
+
+    // Отрисовка списка товаров
+    function renderProducts(items) {
+      const container = document.getElementById('productList');
+      container.innerHTML = '';
+
+      if (items.length === 0) {
+        container.innerHTML = `<div class="text-center py-6 text-gray-400 text-sm">Товары не найдены</div>`;
+        return;
+      }
+
+      items.forEach(product => {
+        const qty = cart[product.id] || 0;
+        const card = document.createElement('div');
+        card.className = `bg-white border rounded-xl p-3 shadow-sm transition-all flex items-center justify-between gap-2 ${qty > 0 ? 'border-blue-500 bg-blue-50/20' : 'border-gray-200'}`;
+
+        card.innerHTML = `
+          <div class="flex-1 min-w-0">
+            <h3 class="text-xs sm:text-sm font-semibold text-gray-800 leading-snug line-clamp-2">${product.name}</h3>
+            <div class="text-xs text-blue-600 font-bold mt-1">${product.price.toLocaleString('ru-RU')} ₸</div>
+          </div>
+          
+          <div class="flex items-center gap-1 sm:gap-2">
+            <button onclick="changeQty(${product.id}, -1)" class="w-8 h-8 sm:w-9 sm:h-9 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 rounded-lg text-gray-700 font-bold text-lg flex items-center justify-center transition-colors">
+              -
+            </button>
+            <input type="number" value="${qty}" onchange="setQty(${product.id}, this.value)" min="0" class="w-10 sm:w-12 h-8 sm:h-9 text-center bg-gray-50 border border-gray-300 rounded-lg text-xs sm:text-sm font-bold focus:outline-none focus:ring-1 focus:ring-blue-500">
+            <button onclick="changeQty(${product.id}, 1)" class="w-8 h-8 sm:w-9 sm:h-9 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg font-bold text-lg flex items-center justify-center transition-colors shadow-sm">
+              +
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('productCount').textContent = `Показано: ${items.length}`;
+    }
+
+    // Изменение количества товара (+ / -)
+    function changeQty(id, delta) {
+      const current = cart[id] || 0;
+      const updated = Math.max(0, current + delta);
+      if (updated === 0) {
+        delete cart[id];
+      } else {
+        cart[id] = updated;
+      }
+      updateCartTotals();
+      filterProducts();
+    }
+
+    // Ручной ввод количества
+    function setQty(id, val) {
+      const parsed = parseInt(val, 10);
+      if (isNaN(parsed) || parsed <= 0) {
+        delete cart[id];
+      } else {
+        cart[id] = parsed;
+      }
+      updateCartTotals();
+      filterProducts();
+    }
+
+    // Поиск по названию
+    document.getElementById('searchInput').addEventListener('input', filterProducts);
+
+    function filterProducts() {
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+      const filtered = products.filter(p => p.name.toLowerCase().includes(query));
+      renderProducts(filtered);
+    }
+
+    // Подсчет общей суммы и штук
+    function updateCartTotals() {
+      let totalSum = 0;
+      let totalItems = 0;
+
+      for (const [id, qty] of Object.entries(cart)) {
+        const prod = products.find(p => p.id === parseInt(id, 10));
+        if (prod) {
+          totalSum += prod.price * qty;
+          totalItems += qty;
+        }
+      }
+
+      document.getElementById('totalSum').textContent = totalSum.toLocaleString('ru-RU');
+      document.getElementById('totalItems').textContent = totalItems;
+    }
+
+    // Формирование и отправка в WhatsApp
+    function sendToWhatsApp() {
+      const ip = document.getElementById('clientIp').value.trim();
+      const address = document.getElementById('clientAddress').value.trim();
+      let phone = document.getElementById('whatsappPhone').value.replace(/\D/g, '');
+      const comment = document.getElementById('orderComment').value.trim();
+
+      if (!ip) {
+        alert('Пожалуйста, укажите ИП / Название точки.');
+        document.getElementById('clientIp').focus();
+        return;
+      }
+
+      if (!address) {
+        alert('Пожалуйста, укажите адрес торговой точки.');
+        document.getElementById('clientAddress').focus();
+        return;
+      }
+
+      if (!phone) {
+        alert('Укажите номер WhatsApp для отправки.');
+        document.getElementById('whatsappPhone').focus();
+        return;
+      }
+
+      const orderEntries = Object.entries(cart).filter(([_, qty]) => qty > 0);
+
+      if (orderEntries.length === 0) {
+        alert('Выберите хотя бы один товар из каталога!');
+        return;
+      }
+
+      // Сохраняем телефон в память браузера для будущего использования
+      localStorage.setItem('tp_whatsapp_phone', phone);
+
+      // Формирование красивого сообщения
+      let message = `🛒 *НОВЫЙ ЗАКАЗ*\n`;
+      message += `------------------------\n`;
+      message += `🏢 *Клиент:* ${ip}\n`;
+      message += `📍 *Адрес:* ${address}\n`;
+      message += `📅 *Дата:* ${new Date().toLocaleDateString('ru-RU')} ${new Date().toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'})}\n`;
+      message += `------------------------\n\n`;
+      message += `📦 *ПОЗИЦИИ ЗАКАЗА:*\n`;
+
+      let totalSum = 0;
+      let count = 1;
+
+      orderEntries.forEach(([id, qty]) => {
+        const prod = products.find(p => p.id === parseInt(id, 10));
+        if (prod) {
+          const itemSum = prod.price * qty;
+          totalSum += itemSum;
+          message += `${count}. *${prod.name}*\n`;
+          message += `   └ ${qty} шт. x ${prod.price} ₸ = *${itemSum.toLocaleString('ru-RU')} ₸*\n`;
+          count++;
+        }
+      });
+
+      message += `\n------------------------\n`;
+      message += `💰 *ИТОГО К ОПЛАТЕ: ${totalSum.toLocaleString('ru-RU')} ₸*\n`;
+
+      if (comment) {
+        message += `\n💬 *Комментарий:* ${comment}\n`;
+      }
+
+      // Формирование ссылки api.whatsapp.com
+      const encodedMsg = encodeURIComponent(message);
+      const waUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMsg}`;
+
+      // Переход в WhatsApp
+      window.open(waUrl, '_blank');
+    }
+  </script>
+</body>
+</html>
